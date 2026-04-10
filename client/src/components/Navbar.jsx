@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { signOut } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import AuthModal from './AuthModal';
+import logo from '../assets/logo.png';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -26,8 +27,7 @@ export default function Navbar() {
     <>
       <nav className={styles.nav}>
         <Link to="/" className={styles.logo}>
-          <span className={styles.logoIcon}>☕</span>
-          <span className={styles.logoText}>chaya<strong>spot</strong></span>
+          <img src={logo} alt="ChayaSpot" className={styles.logoImg} />
         </Link>
 
         <div className={styles.actions}>
