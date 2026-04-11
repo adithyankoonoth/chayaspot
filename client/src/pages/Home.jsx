@@ -121,10 +121,9 @@ export default function Home() {
       {/* Hero */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroTag}>🫖 Community-powered chai map</div>
           <h1 className={styles.heroTitle}>
             Find your next
-            <span className={styles.heroAccent}>cup of chai</span>
+            <span className={styles.heroAccent}>cup of chaya</span>
           </h1>
           <p className={styles.heroSub}>
             Real spots. Real hours. Directions in one tap.
@@ -169,7 +168,7 @@ export default function Home() {
         <div className={styles.sectionTop}>
           <div>
             <h2 className={styles.sectionTitle}>
-              {search ? `Results for "${search}"` : 'Chai spots near you'}
+              {search ? `Results for "${search}"` : 'Chaya spots near you'}
             </h2>
             <p className={styles.sectionSub}>{filtered.length} spot{filtered.length !== 1 ? 's' : ''} found</p>
           </div>
@@ -201,7 +200,7 @@ export default function Home() {
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>☕</div>
             <h3>No spots found</h3>
-            <p>Be the first to add a chai spot here!</p>
+            <p>Be the first to add a Chaya spot here!</p>
             <button className={styles.emptyBtn} onClick={handleAddClick}>Add a spot</button>
           </div>
         ) : (

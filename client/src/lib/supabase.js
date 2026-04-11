@@ -73,20 +73,30 @@ export const updateSpot = async (id, updates) => {
 export const uploadSpotPhoto = async (spotId, file, index) => {
   const ext = file.name.split('.').pop();
   const path = `${spotId}/${index}-${Date.now()}.${ext}`;
+
   const { error: uploadError } = await supabase.storage
     .from('spot-photos')
     .upload(path, file, { cacheControl: '3600', upsert: false });
-  if (uploadError) return { error: uploadError };
 
-  const { data: { user } } = await supabase.auth.getUser();
+  if (uploadError) {
+    console.error('Upload error:', uploadError);
+    return { error: uploadError };
+  }
+
   const { error: dbError } = await supabase
     .from('spot_photos')
-    .insert([{ spot_id: spotId, storage_path: path, uploaded_by: user?.id }]);
+    .insert([{ spot_id: spotId, storage_path: path }]);
+
+  if (dbError) {
+    console.error('DB insert error:', dbError);
+  }
+
   return { error: dbError };
 };
 
 export const getPhotoUrl = (path) => {
   if (!path) return null;
   const { data } = supabase.storage.from('spot-photos').getPublicUrl(path);
+  console.log('Photo URL:', data.publicUrl); // temporary debug
   return data.publicUrl;
 };
