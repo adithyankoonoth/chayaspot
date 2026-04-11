@@ -24,8 +24,45 @@ export function formatTime(timeStr) {
 
 // Open Google Maps directions
 export function openDirections(lat, lng, name) {
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_name=${encodeURIComponent(name || '')}&travelmode=driving`;
-  window.open(url, '_blank');
+  const destination = `${lat},${lng}`;
+  const label = encodeURIComponent(name || 'Chai Spot');
+
+  // On iOS — opens Apple Maps or Google Maps app
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  // On Android — opens Google Maps app directly
+  const isAndroid = /Android/.test(navigator.userAgent);
+
+  if (isAndroid) {
+    // This opens Google Maps app on Android with navigation started
+    window.location.href = `google.navigation:q=${destination}&label=${label}`;
+
+    // Fallback after 500ms if app didn't open
+    setTimeout(() => {
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`,
+        '_blank'
+      );
+    }, 500);
+  } else if (isIOS) {
+    // Opens Google Maps app on iOS if installed, else Apple Maps
+    window.open(
+      `comgooglemaps://?daddr=${destination}&directionsmode=driving`,
+      '_blank'
+    );
+    // Fallback to browser Google Maps
+    setTimeout(() => {
+      window.open(
+        `https://maps.google.com/?daddr=${destination}`,
+        '_blank'
+      );
+    }, 500);
+  } else {
+    // Desktop — open in browser
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${destination}&destination_place_name=${label}&travelmode=driving`,
+      '_blank'
+    );
+  }
 }
 
 // Parse lat/lng from a Google Maps URL

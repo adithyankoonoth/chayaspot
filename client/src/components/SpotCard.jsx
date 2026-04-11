@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { isOpenNow, formatTime, openDirections, formatDistance } from '../lib/utils';
+import { isOpenNow, formatTime, openDirections } from '../lib/utils';
 import { getPhotoUrl } from '../lib/supabase';
 import styles from './SpotCard.module.css';
 
@@ -12,8 +12,13 @@ export default function SpotCard({ spot, userLocation }) {
 
   const handleDirections = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     if (spot.latitude && spot.longitude) {
       openDirections(spot.latitude, spot.longitude, spot.name);
+    } else {
+      // fallback: search by name if no coordinates
+      const query = encodeURIComponent(spot.name + ' ' + (spot.address || ''));
+      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     }
   };
 
@@ -36,7 +41,7 @@ export default function SpotCard({ spot, userLocation }) {
         <div className={styles.top}>
           <h3 className={styles.name}>{spot.name}</h3>
           {spot.chai_price && (
-            <span className={styles.price}>₹{spot.chai_price}</span>
+            <span className={styles.price}>Rs.{spot.chai_price}</span>
           )}
         </div>
 
@@ -64,7 +69,7 @@ export default function SpotCard({ spot, userLocation }) {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <polygon points="3 11 22 2 13 21 11 13 3 11"/>
           </svg>
-          Directions
+          Get Directions
         </button>
       </div>
     </div>
