@@ -100,3 +100,13 @@ export const getPhotoUrl = (path) => {
   console.log('Photo URL:', data.publicUrl); // temporary debug
   return data.publicUrl;
 };
+
+export const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin,
+    },
+  });
+  return { error };
+};

@@ -45,11 +45,12 @@
   align-items: center;
   justify-content: center;
   transition: var(--transition);
+  cursor: pointer;
 }
 
 .close:hover { background: var(--orange-pale); color: var(--brown); }
 
-.header { text-align: center; margin-bottom: 28px; }
+.header { text-align: center; margin-bottom: 24px; }
 .icon { font-size: 40px; margin-bottom: 12px; line-height: 1; }
 
 .title {
@@ -62,6 +63,53 @@
 }
 
 .sub { font-size: 13px; color: var(--muted); }
+
+.googleBtn {
+  width: 100%;
+  background: var(--cream3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-md);
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brown);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 4px;
+}
+
+.googleBtn:hover:not(:disabled) {
+  border-color: var(--orange);
+  background: var(--orange-pale);
+}
+
+.googleBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.dividerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+}
+
+.dividerText {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
 
 .form { display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -99,6 +147,8 @@
   margin-top: 4px;
   transition: var(--transition);
   box-shadow: 0 4px 16px rgba(212, 82, 15, 0.3);
+  cursor: pointer;
+  font-family: var(--font-body);
 }
 
 .submit:hover:not(:disabled) { background: var(--orange-hover); transform: translateY(-1px); }
