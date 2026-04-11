@@ -21,7 +21,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
     longitude: initialData?.longitude || '',
     opens_at: initialData?.opens_at || '06:00',
     closes_at: initialData?.closes_at || '22:00',
-    Chaya_price: initialData?.Chaya_price || '',
+    chai_price: initialData?.chai_price || '',
     phone: initialData?.phone || '',
     description: initialData?.description || '',
   });
@@ -61,7 +61,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       longitude: form.longitude ? parseFloat(form.longitude) : null,
       opens_at: form.opens_at || null,
       closes_at: form.closes_at || null,
-      Chaya_price: form.Chaya_price ? parseFloat(form.Chaya_price) : null,
+      chai_price: form.chai_price ? parseFloat(form.chai_price) : null,
       phone: form.phone || null,
       description: form.description || null,
       created_by: user.id,
@@ -102,7 +102,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
             <div className={styles.row}>
               <div className={styles.field}>
                 <label className={styles.label}>Chaya price (₹)</label>
-                <input className={styles.input} type="number" placeholder="8" min="0" value={form.Chaya_price} onChange={e => set('Chaya_price', e.target.value)} />
+                <input className={styles.input} type="number" placeholder="8" min="0" value={form.chai_price} onChange={e => set('chai_price', e.target.value)} />
               </div>
               <div className={styles.field}>
                 <label className={styles.label}>Contact number</label>
