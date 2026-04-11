@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import SpotDetail from './pages/SpotDetail';
 import './index.css';
+import { Analytics } from "@vercel/analytics/react"
  
 function Footer() {
   return (
@@ -98,6 +99,7 @@ export default function App() {
           }}
         />
       </BrowserRouter>
+      <Analytics />
     </AuthProvider>
   );
 }
