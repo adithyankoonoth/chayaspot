@@ -40,7 +40,7 @@ function Footer() {
       }}>
         <span>Crafted by</span>
         <a
-          href="https://adithyank.me"
+          href="https://adithyankoonoth.github.io/Portfolio/"
           target="_blank"
           rel="noopener noreferrer"
           style={{
