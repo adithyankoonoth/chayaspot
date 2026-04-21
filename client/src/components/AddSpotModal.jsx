@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { createSpot, uploadSpotPhoto } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { parseGoogleMapsUrl } from '../lib/utils';
+import { getCoordinatesFromGroq } from '../lib/groq';
 import toast from 'react-hot-toast';
 import styles from './AddSpotModal.module.css';
 
-const MAX_PHOTOS = 3;
 const MAX_SIZE_MB = 2;
 
 export default function AddSpotModal({ onClose, onSuccess, initialData }) {
   const { user } = useAuth();
   const isEdit = !!initialData;
   const [loading, setLoading] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [photos, setPhotos] = useState([null, null, null]);
   const [form, setForm] = useState({
     name: initialData?.name || '',
@@ -28,14 +29,71 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  const handleMapsLink = (url) => {
+  const handleMapsLink = async (url) => {
     set('maps_link', url);
+    if (!url || url.length < 10) return;
+
+    // STEP 1 — try direct coordinate extraction from URL
     const coords = parseGoogleMapsUrl(url);
     if (coords) {
       set('latitude', coords.lat);
       set('longitude', coords.lng);
       toast.success('Location extracted!');
+      return;
     }
+
+    // STEP 2 — short URL, expand via corsproxy
+    setLocating(true);
+    try {
+      const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+      const res = await fetch(proxy, { method: 'GET', redirect: 'follow' });
+      const expandedUrl = res.url;
+
+      // try coordinates from expanded URL
+      const expandedCoords = parseGoogleMapsUrl(expandedUrl);
+      if (expandedCoords) {
+        set('latitude', expandedCoords.lat);
+        set('longitude', expandedCoords.lng);
+        toast.success('Location extracted!');
+        setLocating(false);
+        return;
+      }
+
+      // try coordinates from page HTML
+      const text = await res.text();
+      const htmlMatch =
+        text.match(/\/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+        text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+        text.match(/"(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})"/);
+
+      if (htmlMatch) {
+        set('latitude', parseFloat(htmlMatch[1]));
+        set('longitude', parseFloat(htmlMatch[2]));
+        toast.success('Location extracted!');
+        setLocating(false);
+        return;
+      }
+    } catch (err) {
+      console.error('corsproxy failed:', err);
+    }
+
+    // STEP 3 — corsproxy failed, use Groq AI
+    if (form.name || form.address) {
+      try {
+        const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
+        if (groqCoords) {
+          set('latitude', groqCoords.lat);
+          set('longitude', groqCoords.lng);
+          toast.success('Location found with AI!');
+          setLocating(false);
+          return;
+        }
+      } catch (err) {
+        console.error('Groq failed:', err);
+      }
+    }
+
+    setLocating(false);
   };
 
   const handlePhoto = (idx, file) => {
@@ -54,11 +112,27 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
     if (!user) { toast.error('Please sign in first'); return; }
     setLoading(true);
 
+    let lat = form.latitude ? parseFloat(form.latitude) : null;
+    let lng = form.longitude ? parseFloat(form.longitude) : null;
+
+    // final fallback — if still no coords, try Groq with name + address
+    if (!lat || !lng) {
+      try {
+        const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
+        if (groqCoords) {
+          lat = groqCoords.lat;
+          lng = groqCoords.lng;
+        }
+      } catch (err) {
+        console.error('Groq submit fallback failed:', err);
+      }
+    }
+
     const payload = {
       name: form.name,
       address: form.address,
-      latitude: form.latitude ? parseFloat(form.latitude) : null,
-      longitude: form.longitude ? parseFloat(form.longitude) : null,
+      latitude: lat,
+      longitude: lng,
       opens_at: form.opens_at || null,
       closes_at: form.closes_at || null,
       chai_price: form.chai_price ? parseFloat(form.chai_price) : null,
@@ -75,7 +149,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       .map((file, i) => uploadSpotPhoto(spot.id, file, i));
     await Promise.all(photoUploads);
 
-    toast.success(isEdit ? 'Spot updated!' : 'Spot added! 🎉');
+    toast.success(isEdit ? 'Spot updated!' : 'Spot added!');
     setLoading(false);
     onSuccess?.();
     onClose();
@@ -101,7 +175,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
             </div>
             <div className={styles.row}>
               <div className={styles.field}>
-                <label className={styles.label}>Chaya price (₹)</label>
+                <label className={styles.label}>Chaya price (Rs.)</label>
                 <input className={styles.input} type="number" placeholder="8" min="0" value={form.chai_price} onChange={e => set('chai_price', e.target.value)} />
               </div>
               <div className={styles.field}>
@@ -125,21 +199,29 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
             <h3 className={styles.sectionTitle}>Location</h3>
             <div className={styles.field}>
               <label className={styles.label}>Address</label>
-              <input className={styles.input} type="text" placeholder="Beach Road, Kozhikode" value={form.address} onChange={e => set('address', e.target.value)} />
+              <input className={styles.input} type="text" placeholder="Beach Road, Kozhikode, Kerala" value={form.address} onChange={e => set('address', e.target.value)} />
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Google Maps link</label>
-              <input className={styles.input} type="url" placeholder="Paste Maps link to auto-detect location" value={form.maps_link} onChange={e => handleMapsLink(e.target.value)} />
-            </div>
-            <div className={styles.row}>
-              <div className={styles.field}>
-                <label className={styles.label}>Latitude</label>
-                <input className={styles.input} type="number" step="any" placeholder="11.2588" value={form.latitude} onChange={e => set('latitude', e.target.value)} />
-              </div>
-              <div className={styles.field}>
-                <label className={styles.label}>Longitude</label>
-                <input className={styles.input} type="number" step="any" placeholder="75.7804" value={form.longitude} onChange={e => set('longitude', e.target.value)} />
-              </div>
+              <label className={styles.label}>
+                Google Maps link
+                {locating && (
+                  <span style={{ marginLeft: '8px', fontSize: '11px', color: 'var(--orange-light)', fontWeight: 500 }}>
+                    finding location...
+                  </span>
+                )}
+              </label>
+              <input
+                className={styles.input}
+                type="text"
+                placeholder="Paste any Google Maps link"
+                value={form.maps_link}
+                onChange={e => handleMapsLink(e.target.value)}
+              />
+              {form.latitude && form.longitude && (
+                <span style={{ fontSize: '11px', color: '#7ecb50', marginTop: '4px', display: 'block' }}>
+                  Location found ({parseFloat(form.latitude).toFixed(4)}, {parseFloat(form.longitude).toFixed(4)})
+                </span>
+              )}
             </div>
           </section>
 
@@ -177,7 +259,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
             />
           </section>
 
-          <button type="submit" className={styles.submit} disabled={loading}>
+          <button type="submit" className={styles.submit} disabled={loading || locating}>
             {loading ? 'Saving...' : isEdit ? 'Save changes' : '+ Submit spot'}
           </button>
         </form>
