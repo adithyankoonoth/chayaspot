@@ -45,10 +45,11 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
     // STEP 2 — short URL, expand via corsproxy
     setLocating(true);
     try {
-      const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-      const res = await fetch(proxy, { method: 'GET', redirect: 'follow' });
-      const expandedUrl = res.url;
-
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy);
+      const json = await res.json();
+      const expandedUrl = json.status?.url || '';
+      const text = json.contents || '';
       // try coordinates from expanded URL
       const expandedCoords = parseGoogleMapsUrl(expandedUrl);
       if (expandedCoords) {
