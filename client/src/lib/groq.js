@@ -2,7 +2,10 @@ const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY;
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 export async function getCoordinatesFromGroq(name, address) {
-  if (!GROQ_API_KEY) return null;
+  if (!GROQ_API_KEY) {
+    console.warn('No Groq API key set');
+    return null;
+  }
   try {
     const response = await fetch(GROQ_URL, {
       method: 'POST',
@@ -20,6 +23,12 @@ export async function getCoordinatesFromGroq(name, address) {
         }]
       }),
     });
+
+    if (!response.ok) {
+      console.error('Groq API error:', response.status, await response.text());
+      return null;
+    }
+
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content?.trim() || '';
     const clean = text.replace(/```json|```/g, '').trim();

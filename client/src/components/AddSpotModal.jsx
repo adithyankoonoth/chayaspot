@@ -61,7 +61,6 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       }
 
       // try coordinates from page HTML
-      const text = await res.text();
       const htmlMatch =
         text.match(/\/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
         text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
