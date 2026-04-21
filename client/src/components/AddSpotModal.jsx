@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createSpot, uploadSpotPhoto } from '../lib/supabase';
+import { createSpot, updateSpot, uploadSpotPhoto } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { parseGoogleMapsUrl } from '../lib/utils';
 import { getCoordinatesFromGroq } from '../lib/groq';
@@ -33,7 +33,6 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
     set('maps_link', url);
     if (!url || url.length < 10) return;
 
-    // STEP 1 — try direct coordinate extraction from URL
     const coords = parseGoogleMapsUrl(url);
     if (coords) {
       set('latitude', coords.lat);
@@ -42,7 +41,6 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       return;
     }
 
-    // STEP 2 — short URL, expand via corsproxy
     setLocating(true);
     try {
       const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
@@ -50,7 +48,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       const json = await res.json();
       const expandedUrl = json.status?.url || '';
       const text = json.contents || '';
-      // try coordinates from expanded URL
+
       const expandedCoords = parseGoogleMapsUrl(expandedUrl);
       if (expandedCoords) {
         set('latitude', expandedCoords.lat);
@@ -60,7 +58,6 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
         return;
       }
 
-      // try coordinates from page HTML
       const htmlMatch =
         text.match(/\/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
         text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
@@ -77,7 +74,6 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       console.error('corsproxy failed:', err);
     }
 
-    // STEP 3 — corsproxy failed, use Groq AI
     if (form.name || form.address) {
       try {
         const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
@@ -108,64 +104,24 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!user) { toast.error('Please sign in first'); return; }
-  setLoading(true);
+    e.preventDefault();
+    if (!user) { toast.error('Please sign in first'); return; }
+    setLoading(true);
 
-  let lat = form.latitude ? parseFloat(form.latitude) : null;
-  let lng = form.longitude ? parseFloat(form.longitude) : null;
+    let lat = form.latitude ? parseFloat(form.latitude) : null;
+    let lng = form.longitude ? parseFloat(form.longitude) : null;
 
-  console.log('--- SUBMIT DEBUG ---');
-  console.log('form.latitude:', form.latitude);
-  console.log('form.longitude:', form.longitude);
-  console.log('lat:', lat);
-  console.log('lng:', lng);
-
-  // final fallback — try Groq if still no coords
-  if (!lat || !lng) {
-    console.log('No coords, trying Groq...');
-    try {
-      const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
-      console.log('Groq returned:', groqCoords);
-      if (groqCoords) {
-        lat = groqCoords.lat;
-        lng = groqCoords.lng;
+    if (!lat || !lng) {
+      try {
+        const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
+        if (groqCoords) {
+          lat = groqCoords.lat;
+          lng = groqCoords.lng;
+        }
+      } catch (err) {
+        console.error('Groq failed:', err);
       }
-    } catch (err) {
-      console.error('Groq failed:', err);
     }
-  }
-
-  console.log('Final lat:', lat, 'Final lng:', lng);
-
-  const payload = {
-    name: form.name,
-    address: form.address,
-    latitude: lat,
-    longitude: lng,
-    opens_at: form.opens_at || null,
-    closes_at: form.closes_at || null,
-    chai_price: form.chai_price ? parseFloat(form.chai_price) : null,
-    phone: form.phone || null,
-    description: form.description || null,
-    created_by: user.id,
-  };
-
-  console.log('Payload being sent:', payload);
-
-  const { data: spot, error } = await createSpot(payload);
-  if (error) { toast.error(error.message); setLoading(false); return; }
-
-  const photoUploads = photos
-    .filter(Boolean)
-    .map((file, i) => uploadSpotPhoto(spot.id, file, i));
-  await Promise.all(photoUploads);
-
-  toast.success(isEdit ? 'Spot updated!' : 'Spot added!');
-  setLoading(false);
-  onSuccess?.();
-  onClose();
-};
 
     const payload = {
       name: form.name,
@@ -180,8 +136,17 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       created_by: user.id,
     };
 
-    const { data: spot, error } = await createSpot(payload);
-    if (error) { toast.error(error.message); setLoading(false); return; }
+    let spot;
+
+    if (isEdit) {
+      const { data, error } = await updateSpot(initialData.id, payload);
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      spot = data;
+    } else {
+      const { data, error } = await createSpot(payload);
+      if (error) { toast.error(error.message); setLoading(false); return; }
+      spot = data;
+    }
 
     const photoUploads = photos
       .filter(Boolean)
@@ -305,3 +270,4 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       </div>
     </div>
   );
+}
