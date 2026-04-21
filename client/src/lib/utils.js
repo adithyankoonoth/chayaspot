@@ -67,10 +67,14 @@ export function openDirections(lat, lng, name) {
 
 // Parse lat/lng from a Google Maps URL
 export function parseGoogleMapsUrl(url) {
+  if (!url) return null;
   const patterns = [
     /@(-?\d+\.\d+),(-?\d+\.\d+)/,
     /\?q=(-?\d+\.\d+),(-?\d+\.\d+)/,
     /ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+    /center=(-?\d+\.\d+)%2C(-?\d+\.\d+)/,
+    /\/(-?\d+\.\d+),(-?\d+\.\d+)/,
   ];
   for (const pattern of patterns) {
     const match = url.match(pattern);
