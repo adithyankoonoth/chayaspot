@@ -7,6 +7,52 @@ import SpotDetail from './pages/SpotDetail';
 import './index.css';
 import { Analytics } from "@vercel/analytics/react"
 
+function BuyMeCoffeeBtn() {
+  return (
+    <a
+      href="https://buymeacoffee.com/adithyank"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        position: 'fixed',
+        bottom: '28px',
+        left: '24px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '6px',
+        background: '#D4520F',
+        color: '#fff',
+        fontFamily: 'var(--font-body)',
+        fontWeight: '700',
+        fontSize: '12px',
+        padding: '9px 14px',
+        borderRadius: '100px',
+        textDecoration: 'none',
+        boxShadow: '0 8px 32px rgba(212, 82, 15, 0.35)',
+        zIndex: 50,
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = 'translateY(-2px)';
+        e.currentTarget.style.background = '#BF4A0D';
+        e.currentTarget.style.boxShadow = '0 12px 40px rgba(212, 82, 15, 0.4)';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.background = '#D4520F';
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(212, 82, 15, 0.35)';
+      }}
+    >
+      <img
+        src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
+        alt="coffee"
+        style={{ width: '14px', height: '14px', filter: 'brightness(10)' }}
+      />
+      Buy me a coffee
+    </a>
+  );
+}
+
 function Footer() {
   return (
     <footer style={{
@@ -17,43 +63,8 @@ function Footer() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '16px',
+      gap: '8px',
     }}>
-      <a
-        href="https://buymeacoffee.com/adithyank"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: '#FFDD00',
-          color: '#000000',
-          fontFamily: 'var(--font-body)',
-          fontWeight: '700',
-          fontSize: '14px',
-          padding: '10px 20px',
-          borderRadius: '8px',
-          textDecoration: 'none',
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        }}
-        onMouseEnter={e => {
-          e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 221, 0, 0.4)';
-        }}
-        onMouseLeave={e => {
-          e.currentTarget.style.transform = 'translateY(0)';
-          e.currentTarget.style.boxShadow = 'none';
-        }}
-      >
-        <img
-          src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
-          alt="Buy me a coffee"
-          style={{ width: '20px', height: '20px' }}
-        />
-        Buy me a coffee
-      </a>
-
       <div style={{
         fontSize: '11px',
         fontWeight: '600',
@@ -118,6 +129,7 @@ export default function App() {
           </main>
           <Footer />
         </div>
+        <BuyMeCoffeeBtn />
         <Toaster
           position="bottom-center"
           toastOptions={{
