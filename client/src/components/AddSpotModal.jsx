@@ -108,25 +108,64 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) { toast.error('Please sign in first'); return; }
-    setLoading(true);
+  e.preventDefault();
+  if (!user) { toast.error('Please sign in first'); return; }
+  setLoading(true);
 
-    let lat = form.latitude ? parseFloat(form.latitude) : null;
-    let lng = form.longitude ? parseFloat(form.longitude) : null;
+  let lat = form.latitude ? parseFloat(form.latitude) : null;
+  let lng = form.longitude ? parseFloat(form.longitude) : null;
 
-    // final fallback — if still no coords, try Groq with name + address
-    if (!lat || !lng) {
-      try {
-        const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
-        if (groqCoords) {
-          lat = groqCoords.lat;
-          lng = groqCoords.lng;
-        }
-      } catch (err) {
-        console.error('Groq submit fallback failed:', err);
+  console.log('--- SUBMIT DEBUG ---');
+  console.log('form.latitude:', form.latitude);
+  console.log('form.longitude:', form.longitude);
+  console.log('lat:', lat);
+  console.log('lng:', lng);
+
+  // final fallback — try Groq if still no coords
+  if (!lat || !lng) {
+    console.log('No coords, trying Groq...');
+    try {
+      const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
+      console.log('Groq returned:', groqCoords);
+      if (groqCoords) {
+        lat = groqCoords.lat;
+        lng = groqCoords.lng;
       }
+    } catch (err) {
+      console.error('Groq failed:', err);
     }
+  }
+
+  console.log('Final lat:', lat, 'Final lng:', lng);
+
+  const payload = {
+    name: form.name,
+    address: form.address,
+    latitude: lat,
+    longitude: lng,
+    opens_at: form.opens_at || null,
+    closes_at: form.closes_at || null,
+    chai_price: form.chai_price ? parseFloat(form.chai_price) : null,
+    phone: form.phone || null,
+    description: form.description || null,
+    created_by: user.id,
+  };
+
+  console.log('Payload being sent:', payload);
+
+  const { data: spot, error } = await createSpot(payload);
+  if (error) { toast.error(error.message); setLoading(false); return; }
+
+  const photoUploads = photos
+    .filter(Boolean)
+    .map((file, i) => uploadSpotPhoto(spot.id, file, i));
+  await Promise.all(photoUploads);
+
+  toast.success(isEdit ? 'Spot updated!' : 'Spot added!');
+  setLoading(false);
+  onSuccess?.();
+  onClose();
+};
 
     const payload = {
       name: form.name,
@@ -266,4 +305,3 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
       </div>
     </div>
   );
-}
