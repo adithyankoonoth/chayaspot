@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import SpotDetail from './pages/SpotDetail';
 import './index.css';
 import { Analytics } from "@vercel/analytics/react"
- 
+
 function Footer() {
   return (
     <footer style={{
@@ -17,8 +17,43 @@ function Footer() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '8px',
+      gap: '16px',
     }}>
+      <a
+        href="https://buymeacoffee.com/adithyank"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#FFDD00',
+          color: '#000000',
+          fontFamily: 'var(--font-body)',
+          fontWeight: '700',
+          fontSize: '14px',
+          padding: '10px 20px',
+          borderRadius: '8px',
+          textDecoration: 'none',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 221, 0, 0.4)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
+        <img
+          src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
+          alt="Buy me a coffee"
+          style={{ width: '20px', height: '20px' }}
+        />
+        Buy me a coffee
+      </a>
+
       <div style={{
         fontSize: '11px',
         fontWeight: '600',
@@ -27,8 +62,9 @@ function Footer() {
         color: 'var(--muted)',
         fontFamily: 'var(--font-body)',
       }}>
-        Made with ☕ for ഒറ്റ mind teams 
+        Made with ☕ for ഒറ്റ mind teams
       </div>
+
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -63,12 +99,11 @@ function Footer() {
         >
           Adithyan
         </a>
-        
       </div>
     </footer>
   );
 }
- 
+
 export default function App() {
   return (
     <AuthProvider>
@@ -103,4 +138,3 @@ export default function App() {
     </AuthProvider>
   );
 }
- 
