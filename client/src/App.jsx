@@ -13,42 +13,39 @@ function BuyMeCoffeeBtn() {
       href="https://buymeacoffee.com/adithyank"
       target="_blank"
       rel="noopener noreferrer"
+      title="Buy me a coffee"
       style={{
         position: 'fixed',
         bottom: '28px',
         left: '24px',
-        display: 'inline-flex',
+        display: 'flex',
         alignItems: 'center',
-        gap: '6px',
+        justifyContent: 'center',
+        width: '44px',
+        height: '44px',
         background: '#D4520F',
-        color: '#fff',
-        fontFamily: 'var(--font-body)',
-        fontWeight: '700',
-        fontSize: '12px',
-        padding: '9px 14px',
-        borderRadius: '100px',
+        borderRadius: '50%',
         textDecoration: 'none',
-        boxShadow: '0 8px 32px rgba(212, 82, 15, 0.35)',
+        boxShadow: '0 4px 16px rgba(212, 82, 15, 0.35)',
         zIndex: 50,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
       }}
       onMouseEnter={e => {
         e.currentTarget.style.transform = 'translateY(-2px)';
         e.currentTarget.style.background = '#BF4A0D';
-        e.currentTarget.style.boxShadow = '0 12px 40px rgba(212, 82, 15, 0.4)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(212, 82, 15, 0.4)';
       }}
       onMouseLeave={e => {
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.background = '#D4520F';
-        e.currentTarget.style.boxShadow = '0 8px 32px rgba(212, 82, 15, 0.35)';
+        e.currentTarget.style.boxShadow = '0 4px 16px rgba(212, 82, 15, 0.35)';
       }}
     >
       <img
         src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
-        alt="coffee"
-        style={{ width: '14px', height: '14px', filter: 'brightness(10)' }}
+        alt="Buy me a coffee"
+        style={{ width: '22px', height: '22px', filter: 'brightness(10)' }}
       />
-      Buy me a coffee
     </a>
   );
 }
