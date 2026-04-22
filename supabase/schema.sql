@@ -1,7 +1,3 @@
--- ============================================================
--- ChayaSpot — Supabase Schema
--- Run this in your Supabase SQL editor
--- ============================================================
 
 -- Enable UUID extension (already enabled in Supabase by default)
 -- create extension if not exists "uuid-ossp";
