@@ -126,7 +126,7 @@ export default function Home() {
             <span className={styles.heroAccent}>cup of chaya</span>
           </h1>
           <p className={styles.heroSub}>
-            Real spots. Real hours. Directions in one tap.
+            For the ഒറ്റ Mind Teams.
           </p>
 
           <div className={styles.searchWrap}>
