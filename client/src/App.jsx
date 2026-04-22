@@ -7,49 +7,6 @@ import SpotDetail from './pages/SpotDetail';
 import './index.css';
 import { Analytics } from "@vercel/analytics/react"
 
-function BuyMeCoffeeBtn() {
-  return (
-    <a
-      href="https://buymeacoffee.com/adithyank"
-      target="_blank"
-      rel="noopener noreferrer"
-      title="Buy me a coffee"
-      style={{
-        position: 'fixed',
-        bottom: '28px',
-        left: '24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '44px',
-        height: '44px',
-        background: '#D4520F',
-        borderRadius: '50%',
-        textDecoration: 'none',
-        boxShadow: '0 4px 16px rgba(212, 82, 15, 0.35)',
-        zIndex: 50,
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.background = '#BF4A0D';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(212, 82, 15, 0.4)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.background = '#D4520F';
-        e.currentTarget.style.boxShadow = '0 4px 16px rgba(212, 82, 15, 0.35)';
-      }}
-    >
-      <img
-        src="https://cdn.buymeacoffee.com/buttons/bmc-new-btn-logo.svg"
-        alt="Buy me a coffee"
-        style={{ width: '22px', height: '22px', filter: 'brightness(10)' }}
-      />
-    </a>
-  );
-}
-
 function Footer() {
   return (
     <footer style={{
@@ -126,7 +83,6 @@ export default function App() {
           </main>
           <Footer />
         </div>
-        <BuyMeCoffeeBtn />
         <Toaster
           position="bottom-center"
           toastOptions={{
