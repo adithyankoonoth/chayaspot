@@ -30,67 +30,82 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
   const handleMapsLink = async (url) => {
-    set('maps_link', url);
-    if (!url || url.length < 10) return;
+  set('maps_link', url);
+  if (!url || url.length < 10) return;
 
-    const coords = parseGoogleMapsUrl(url);
-    if (coords) {
-      set('latitude', coords.lat);
-      set('longitude', coords.lng);
+  // STEP 1 — try direct coordinate extraction from URL
+  const coords = parseGoogleMapsUrl(url);
+  if (coords) {
+    set('latitude', coords.lat);
+    set('longitude', coords.lng);
+    toast.success('Location extracted!');
+    return;
+  }
+
+  // STEP 2 — expand via Supabase edge function
+  setLocating(true);
+  try {
+    const res = await fetch(
+      `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/expand-url`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.REACT_APP_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({ url }),
+      }
+    );
+
+    const json = await res.json();
+    const expandedUrl = json.finalUrl || '';
+    const text = json.html || '';
+
+    // try from expanded URL
+    const expandedCoords = parseGoogleMapsUrl(expandedUrl);
+    if (expandedCoords) {
+      set('latitude', expandedCoords.lat);
+      set('longitude', expandedCoords.lng);
       toast.success('Location extracted!');
+      setLocating(false);
       return;
     }
 
-    setLocating(true);
+    // try from HTML body
+    const htmlMatch =
+      text.match(/\/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+      text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+      text.match(/"(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})"/);
+
+    if (htmlMatch) {
+      set('latitude', parseFloat(htmlMatch[1]));
+      set('longitude', parseFloat(htmlMatch[2]));
+      toast.success('Location extracted!');
+      setLocating(false);
+      return;
+    }
+  } catch (err) {
+    console.error('edge function failed:', err);
+  }
+
+  // STEP 3 — Groq fallback using name and address
+  if (form.name || form.address) {
     try {
-      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      const res = await fetch(proxy);
-      const json = await res.json();
-      const expandedUrl = json.status?.url || '';
-      const text = json.contents || '';
-
-      const expandedCoords = parseGoogleMapsUrl(expandedUrl);
-      if (expandedCoords) {
-        set('latitude', expandedCoords.lat);
-        set('longitude', expandedCoords.lng);
-        toast.success('Location extracted!');
-        setLocating(false);
-        return;
-      }
-
-      const htmlMatch =
-        text.match(/\/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
-        text.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
-        text.match(/"(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})"/);
-
-      if (htmlMatch) {
-        set('latitude', parseFloat(htmlMatch[1]));
-        set('longitude', parseFloat(htmlMatch[2]));
-        toast.success('Location extracted!');
+      const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
+      if (groqCoords) {
+        set('latitude', groqCoords.lat);
+        set('longitude', groqCoords.lng);
+        toast.success('Location found with AI!');
         setLocating(false);
         return;
       }
     } catch (err) {
-      console.error('corsproxy failed:', err);
+      console.error('Groq failed:', err);
     }
+  }
 
-    if (form.name || form.address) {
-      try {
-        const groqCoords = await getCoordinatesFromGroq(form.name, form.address);
-        if (groqCoords) {
-          set('latitude', groqCoords.lat);
-          set('longitude', groqCoords.lng);
-          toast.success('Location found with AI!');
-          setLocating(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Groq failed:', err);
-      }
-    }
-
-    setLocating(false);
-  };
+  setLocating(false);
+};
 
   const handlePhoto = (idx, file) => {
     if (!file) return;
