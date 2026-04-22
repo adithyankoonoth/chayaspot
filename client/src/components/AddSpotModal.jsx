@@ -190,7 +190,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
             <h3 className={styles.sectionTitle}>Basic info</h3>
             <div className={styles.field}>
               <label className={styles.label}>Spot name *</label>
-              <input className={styles.input} type="text" placeholder="e.g. Basheer's Kadal Chaya" value={form.name} onChange={e => set('name', e.target.value)} required />
+              <input className={styles.input} type="text" placeholder="e.g. Basheer Ikka de Thattukada" value={form.name} onChange={e => set('name', e.target.value)} required />
             </div>
             <div className={styles.row}>
               <div className={styles.field}>
