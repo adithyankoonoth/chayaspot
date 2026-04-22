@@ -198,7 +198,7 @@ export default function AddSpotModal({ onClose, onSuccess, initialData }) {
                 <input className={styles.input} type="number" placeholder="8" min="0" value={form.chai_price} onChange={e => set('chai_price', e.target.value)} />
               </div>
               <div className={styles.field}>
-                <label className={styles.label}>Contact number</label>
+                <label className={styles.label}>Contact number (Optional) </label>
                 <input className={styles.input} type="tel" placeholder="+91 98..." value={form.phone} onChange={e => set('phone', e.target.value)} />
               </div>
             </div>
